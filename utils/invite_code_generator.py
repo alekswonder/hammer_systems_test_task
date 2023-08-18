@@ -6,7 +6,7 @@ from django.db import connection
 CODE_LENGTH: int = 6
 
 
-def generate_code() -> str:
+def generate_invite_code() -> str:
     """Генерация случайной последовательности символов для реферального кода"""
     referral_codes: tuple = ()
 

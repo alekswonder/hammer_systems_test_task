@@ -1,8 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from utils.generate_code import generate_code
-
 
 class CustomUser(AbstractUser):
     phone_number = models.CharField(max_length=12,
@@ -13,14 +11,12 @@ class CustomUser(AbstractUser):
     invite_code = models.CharField(max_length=6,
                                    null=False,
                                    blank=False,
-                                   unique=True,
-                                   default=generate_code())
+                                   unique=True,)
     referral_code = models.CharField(max_length=6,
                                      null=True,
                                      blank=True)
 
     USERNAME_FIELD = 'phone_number'
-    REQUIRED_FIELDS = ['phone_number', ]
 
     class Meta:
         default_related_name = 'users'
