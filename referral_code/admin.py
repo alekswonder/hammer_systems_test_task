@@ -4,7 +4,7 @@ from .models import ReferralCode
 
 
 class ReferralCodeAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'referral_code', 'host_user')
+    list_display = ('pk', 'invite_code', 'host_user')
     empty_value_display = 'пусто'
 
 

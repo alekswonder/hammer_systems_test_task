@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from .managers import CustomUserManager
+
 
 class CustomUser(AbstractUser):
     phone_number = models.CharField(max_length=12,
@@ -8,15 +10,19 @@ class CustomUser(AbstractUser):
                                     null=False,
                                     blank=False,
                                     verbose_name='Номер телефона',)
-    invite_code = models.CharField(max_length=6,
-                                   null=False,
-                                   blank=False,
-                                   unique=True,)
     referral_code = models.CharField(max_length=6,
-                                     null=True,
-                                     blank=True)
+                                     null=False,
+                                     blank=False,
+                                     unique=True,
+                                     verbose_name='Реферальный код')
+    invite_code = models.CharField(max_length=6,
+                                   null=True,
+                                   blank=True,
+                                   verbose_name='Код приглашения')
 
     USERNAME_FIELD = 'phone_number'
+
+    objects = CustomUserManager()
 
     class Meta:
         default_related_name = 'users'

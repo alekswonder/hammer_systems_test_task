@@ -5,11 +5,10 @@ User = get_user_model()
 
 
 class ReferralCode(models.Model):
-    referral_code = models.CharField(max_length=12,
-                                     unique=True,
-                                     null=False,
-                                     blank=False,
-                                     verbose_name='Реферальный код')
+    invite_code = models.CharField(max_length=12,
+                                   null=False,
+                                   blank=False,
+                                   verbose_name='Код приглашения')
     host_user = models.ForeignKey(User,
                                   on_delete=models.CASCADE,
                                   verbose_name='Владелец')
@@ -20,4 +19,4 @@ class ReferralCode(models.Model):
         verbose_name_plural = 'Реферальные коды'
 
     def __str__(self):
-        return self.referral_code
+        return self.invite_code

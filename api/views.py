@@ -1,18 +1,24 @@
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, get_user_model
 from django.core.cache import cache
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.serializers import AuthSerializer, AuthWithOTPSerializer
+from api.serializers import AuthWithOTPSerializer, CustomUserSerializer
 from utils.otp_generator import generate_otp
 from utils.sms_service import send_sms
+
+User = get_user_model()
 
 
 class AuthAPIView(APIView):
     def get(self, request):
-        return Response({'username': request.user.username})
+        if request.user.is_anonymous:
+            return Response({'message':
+                                 'Enter your phone number using post method'})
+        return Response({'message': f'You are already authorized,'
+                                    f' {request.user.username}'})
 
     @csrf_exempt
     def post(self, request):
@@ -45,7 +51,7 @@ class AuthAPIView(APIView):
             otp_code = generate_otp()
             send_sms(otp_code)
             self.store_otp_in_cache(request.data.get('phone_number'), otp_code)
-            return Response({"message": "OTP sent successfully"},
+            return Response({'message': f'OTP:{otp_code} sent successfully'},
                             status=status.HTTP_200_OK)
 
     def clear_cookies(self, request):
@@ -62,3 +68,13 @@ class AuthAPIView(APIView):
         cache_key = 'otp_codes'
         otp_codes = cache.get(cache_key, {})
         return otp_codes.get(phone_number, None)
+
+
+class ProfileAPIView(APIView):
+    def get(self, request):
+        custom_user = User.objects.get(username=request.user.username)
+        serializer = CustomUserSerializer(custom_user)
+        return Response(serializer.data)
+
+    def post(self, request):
+        ...
