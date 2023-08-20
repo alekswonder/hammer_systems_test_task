@@ -1,18 +1,14 @@
-from django.urls import include, path
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 
-from api.views import AuthViewSet
+from api.views import AuthViewSet, UserProfileViewSet
 
 app_name = 'api'
 
-router_api_v1 = DefaultRouter()
-
-router_api_v1.register(
-    r'',
-    AuthViewSet,
-    basename=''
-)
 
 urlpatterns = [
-    path('v1/', include(router_api_v1.urls))
+    path('auth/', AuthViewSet.as_view({'post': 'auth'}), name='auth'),
+    path('profile/me/',
+         UserProfileViewSet.as_view({'get': 'me', 'post': 'me'}),
+         name='profile-me'),
 ]
+

@@ -20,12 +20,12 @@ class AuthSerializer(serializers.Serializer):
     otp_code = serializers.CharField(required=False,
                                      max_length=4)
 
-    def validate(self, attrs: dict):
-        phone_number = attrs.get('phone_number')
-        otp_code = attrs.get('otp_code')
+    def validate(self, attrs: dict) -> dict:
+        phone_number: str = attrs.get('phone_number')
+        otp_code: str = attrs.get('otp_code')
 
         if otp_code:
-            stored_otp = self.get_stored_otp_from_cache(phone_number)
+            stored_otp: str = self.get_stored_otp_from_cache(phone_number)
             if stored_otp and otp_code == stored_otp:
                 try:
                     user = User.objects.get(username=phone_number)
@@ -56,7 +56,7 @@ class AuthSerializer(serializers.Serializer):
         otp_codes[phone_number] = otp_code
         cache.set(cache_key, otp_codes, timeout=300)
 
-    def get_stored_otp_from_cache(self, phone_number: str) -> int:
+    def get_stored_otp_from_cache(self, phone_number: str) -> str:
         cache_key = 'otp_codes'
         otp_codes = cache.get(cache_key, {})
         return otp_codes.get(phone_number, None)
@@ -67,3 +67,17 @@ class ReferralCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReferralCode
         fields = ('invite_code', 'host_user', )
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    referrals = serializers.SerializerMethodField()
+
+    class Meta:
+        model = UserProfile
+        fields = ('phone_number', 'referral_code', 'invite_code', 'referrals')
+
+    def get_referrals(self, obj) -> tuple:
+        referrals = ReferralCode.objects.filter(
+            invite_code=obj.referral_code
+        ).select_related('host_user').all()
+        return tuple(ref.host_user.profile.phone_number for ref in referrals)
