@@ -11,7 +11,7 @@ def generate_referral_code() -> str:
     referral_codes: tuple = ()
 
     with connection.cursor() as cursor:
-        cursor.execute('select distinct invite_code from users_customuser')
+        cursor.execute('select distinct referral_code from user_profile_userprofile')
         referral_codes = tuple(map(lambda element: element[0],
                                    cursor.fetchall()))
 
