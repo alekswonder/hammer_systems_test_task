@@ -1,0 +1,159 @@
+openapi: 3.0.2
+info:
+  title: 'HammerSystemsTestTask'
+  version: 'v0.1'
+paths:
+  /api/auth/ *with out OTP code in request body:
+    post:
+      operationId: authAuthWithOutOTP
+      description: 'Авторизация по мобильному номеру. Пользователь вводит номер телефона, после чего ему должно прийти SMS-сообщение с OTP-кодом, при передаче которого в теле следующего запроса произойдет авторизация'
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthWithOutOTP'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthWithOutOTPResponse'
+          description: 'Вернется информация об отрпавке SMS-сообщения, также OTP-код'
+      tags:
+      - api
+  /api/auth/ *with OTP code in request body:
+    post:
+      operationId: authAuthWithOTP
+      description: 'Авторизация по мобильному номеру. Пользователь передает номер телефона и OTP-код в теле запроса, после чего после чего происходит авторизация'
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthWithOTP'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthWithOTPResponse'
+          description: 'Возвращается телефон, OTP-код и сгенерированный токен пользователся'
+      tags:
+      - api
+  /api/profile/me/:
+    get:
+      operationId: meUserProfile
+      description: 'Запрос с токеном пользователя в параметрах вернет информацию о пользователе'
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          description: 'Token'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+          description:
+      tags:
+      - api
+    post:
+      operationId: meUserProfile
+      description: 'Отправка invite code в теле запроса в профиле пользователя, который не вводил пригласительный код'
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          description: 'Token'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfilePOST'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+          description: ''
+      tags:
+      - api
+
+components:
+  schemas:
+    UserProfile:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          maxLength: 12
+        referral_code:
+          type: string
+          maxLength: 6
+        invite_code:
+          type: string
+          nullable: true
+          maxLength: 6
+        referrals:
+          type: string
+          readOnly: true
+      required:
+      - phone_number
+      - referral_code
+    UserProfilePOST:
+      type: object
+      properties:
+        invite_code:
+          type: string
+          nullable: true
+          maxLength: 6
+    AuthWithOutOTP:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          maxLength: 12
+      required:
+      - phone_number
+    AuthWithOutOTPResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          maxLength: 12
+      required:
+      - phone_number
+    AuthWithOTP:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          maxLength: 12
+        otp_code:
+          type: string
+          maxLength: 6
+      required:
+      - phone_number
+    AuthWithOTPResponse:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          maxLength: 12
+        otp_code:
+          type: string
+          maxLength: 6
+        user_token:
+          type: string
+      required:
+      - phone_number
+    SendSMSMessage:
+      type: string
+      properties:
+        message:
+          type: string
